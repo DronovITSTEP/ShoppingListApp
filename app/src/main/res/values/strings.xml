@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ShoppingListApp</string>
+    <string name="add_button">Добавить</string>
+</resources>
