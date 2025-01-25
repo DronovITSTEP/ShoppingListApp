@@ -14,7 +14,7 @@ import android.view.View;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
+// взято из источника https://github.com/FanFataL/swipe-controller-demo
 /**
  * Перечисление состояний кнопок.
  */
