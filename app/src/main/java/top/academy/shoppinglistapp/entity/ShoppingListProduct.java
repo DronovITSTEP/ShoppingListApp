@@ -5,23 +5,23 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "productListProducts",
+@Entity(tableName = "shoppingListProducts",
 foreignKeys = {
         @ForeignKey(entity = Product.class,
         parentColumns = "id",
         childColumns = "productId",
         onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = ListProduct.class,
+        @ForeignKey(entity = ShoppingList.class,
         parentColumns = "id",
-        childColumns = "listProductId",
+        childColumns = "shoppingListId",
         onDelete = ForeignKey.CASCADE)
 },
-indices = {@Index("productId"), @Index("listProductId")})
-public class ProductListProduct {
+indices = {@Index("productId"), @Index("shoppingListId")})
+public class ShoppingListProduct {
     @PrimaryKey(autoGenerate = true)
     private long id;
     private long productId;
-    private long listProductId;
+    private long shoppingListId;
     private boolean isBought;
 
     public long getId() {
@@ -40,12 +40,12 @@ public class ProductListProduct {
         this.productId = productId;
     }
 
-    public long getListProductId() {
-        return listProductId;
+    public long getShoppingListId() {
+        return shoppingListId;
     }
 
-    public void setListProductId(long listProductId) {
-        this.listProductId = listProductId;
+    public void setShoppingListId(long shoppingListId) {
+        this.shoppingListId = shoppingListId;
     }
 
     public boolean isBought() {

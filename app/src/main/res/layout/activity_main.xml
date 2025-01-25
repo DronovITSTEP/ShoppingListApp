@@ -6,20 +6,29 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical">
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"/>
-    <ScrollView
+        android:text="@string/appNameText"
+        android:gravity="center_horizontal"/>
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listShoppingRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </ScrollView>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:overScrollMode="never" />
+    </FrameLayout>
+
     <Button
+        android:id="@+id/addShoppingListButton"
         android:layout_width="150dp"
         android:layout_height="50dp"
-        android:text="@string/add_button" />
+        android:text="@string/addText"
+        android:layout_gravity="center_horizontal"/>
 </LinearLayout>

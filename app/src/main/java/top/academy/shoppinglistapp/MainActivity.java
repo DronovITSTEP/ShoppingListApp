@@ -1,94 +1,122 @@
 package top.academy.shoppinglistapp;
 
+import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
+import static androidx.recyclerview.widget.ItemTouchHelper.LEFT;
+import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
+
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 import top.academy.shoppinglistapp.adapter.ShoppingListAdapter;
-import top.academy.shoppinglistapp.database.AppDatabase;
-import top.academy.shoppinglistapp.entity.ListProduct;
+import top.academy.shoppinglistapp.entity.ShoppingList;
+import top.academy.shoppinglistapp.swipe.SwipeController;
+import top.academy.shoppinglistapp.swipe.SwipeControllerActions;
 
+/**
+ * Главная активность приложения для управления списками покупок.
+ * Эта активность отображает список списков покупок и позволяет добавлять новые списки.
+ */
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView recyclerShopping;
+    private RecyclerView listShoppingRecyclerView;
     private ShoppingListAdapter shoppingListAdapter;
-    private List<ListProduct> listProducts;
-    private AppDatabase db;
+    private ShoppingListViewModel viewModel;
+    private SwipeController swipeController;
 
+    /**
+     * Метод, вызываемый при создании активности.
+     *
+     * @param savedInstanceState Сохраненное состояние активности.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Установка обработчика для применения отступов окон
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        recyclerShopping = findViewById(R.id.listShoppingRecyclerView);
-        recyclerShopping.setLayoutManager(new LinearLayoutManager(this));
+        listShoppingRecyclerView = findViewById(R.id.listShoppingRecyclerView);
+        listShoppingRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "shopping-list-database")
-                .allowMainThreadQueries()
-                .build();
+        viewModel = new ViewModelProvider(this).get(ShoppingListViewModel.class);
+        viewModel.getShoppingLists().observe(this, shoppingLists -> {
+            shoppingListAdapter = new ShoppingListAdapter(shoppingLists, this);
+            listShoppingRecyclerView.setAdapter(shoppingListAdapter);
+        });
 
-        listProducts = new ArrayList<>();
+        Button addShoppingListButton = findViewById(R.id.addShoppingListButton);
+        addShoppingListButton.setOnClickListener((v) -> showAddShoppingListDialog());
 
-        ListProduct lp = new ListProduct();
-        lp.setName("Test product");
-        lp.setDescription("Test description");
-        lp.setDate("01.01.2000");
-        listProducts.add(lp);
-
-        shoppingListAdapter = new ShoppingListAdapter(listProducts);
-        recyclerShopping.setAdapter(shoppingListAdapter);
-
-        loadShoppingLists();
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        swipeController = new SwipeController(new SwipeControllerActions() {
             @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
+            public void onRightClicked(int position) {
+                shoppingListAdapter.removeItem(position);
+                shoppingListAdapter.notifyItemRemoved(position);
+                shoppingListAdapter.notifyItemRangeChanged(position, shoppingListAdapter.getItemCount());
             }
+        });
 
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
+        itemTouchhelper.attachToRecyclerView(listShoppingRecyclerView);
+
+        listShoppingRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                    int position = viewHolder.getAdapterPosition();
-                    ListProduct lp = listProducts.get(position);
-
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
             }
-
-            @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX,
-                                    float dY, int actionState, boolean isCurrentlyActivity) {
-                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    View itemView = viewHolder.itemView;
-
-                    float alpha = 1 - Math.abs(dX) / itemView.getWidth();
-                    itemView.setAlpha(alpha);
-                }
-
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActivity);
-            }
-        }).attachToRecyclerView(recyclerShopping);
+        });
     }
 
-    public void loadShoppingLists() {
-        listProducts = db.listProductDao().getAllListProducts();
-        shoppingListAdapter.notifyDataSetChanged();
+    /**
+     * Отображает диалоговое окно для добавления нового списка покупок.
+     */
+    private void showAddShoppingListDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialogAddShoppingListText);
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.add_shopping_list, null);
+        builder.setView(dialogView);
+
+        EditText titleEditText = dialogView.findViewById(R.id.titleEditText);
+        EditText descriptionEditText = dialogView.findViewById(R.id.descriptionEditText);
+
+        builder.setPositiveButton(R.string.addText, (dialog, witch) -> {
+            String title = titleEditText.getText().toString();
+            String description = descriptionEditText.getText().toString();
+
+            ShoppingList shoppingList = new ShoppingList();
+            shoppingList.setTitle(title);
+            shoppingList.setDescription(description);
+            shoppingList.setDate(new Date().toString());
+
+            viewModel.insertShoppingList(shoppingList);
+        });
+        builder.setNegativeButton(R.string.cancelText, (dialog, witch) -> dialog.dismiss());
+
+        builder.show();
     }
 }

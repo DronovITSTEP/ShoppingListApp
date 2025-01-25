@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">ShoppingListApp</string>
-    <string name="add_button">Добавить</string>
+    <string name="appNameText">Список покупок</string>
+    <string name="addText">Добавить</string>
+    <string name="deleteText">Удалить</string>
+    <string name="cancelText">Отменить</string>
+    <string name="updateText">Изменить</string>
+    <string name="titleText">Название</string>
+    <string name="descriptionText">Описание</string>
+    <string name="dialogAddShoppingListText">Добавление нового списка</string>
 </resources>

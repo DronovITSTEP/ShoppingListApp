@@ -3,11 +3,11 @@ package top.academy.shoppinglistapp.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "listProducts")
-public class ListProduct {
+@Entity(tableName = "shoppingLists")
+public class ShoppingList {
     @PrimaryKey(autoGenerate = true)
     private long id;
-    private String name;
+    private String title;
     private String description;
     private String date;
 
@@ -19,12 +19,12 @@ public class ListProduct {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
