@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/products"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProductActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/appNameText"
+        android:gravity="center_horizontal"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listProductRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:overScrollMode="never" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/addProductButton"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="@string/addText"
+        android:layout_gravity="center_horizontal"/>
+</LinearLayout>

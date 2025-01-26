@@ -5,7 +5,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,25 +15,25 @@ import java.util.List;
 
 import top.academy.shoppinglistapp.R;
 import top.academy.shoppinglistapp.database.AppDatabase;
-import top.academy.shoppinglistapp.entity.ShoppingList;
+import top.academy.shoppinglistapp.entity.Product;
 
 /**
  * Адаптер для отображения списка списков покупок в RecyclerView.
  * Этот адаптер управляет привязкой данных списка покупок к представлениям и удалением элементов.
  */
-public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapter.ShoppingListViewHolder> {
-    private List<ShoppingList> shoppingLists;
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+    private List<Product> products;
     private Context context;
     private AppDatabase db;
 
     /**
      * Конструктор для ShoppingListAdapter.
      *
-     * @param shoppingLists Список списков покупок для отображения.
+     * @param products Список списков покупок для отображения.
      * @param context Контекст активности или фрагмента, использующего этот адаптер.
      */
-    public ShoppingListAdapter(List<ShoppingList> shoppingLists, Context context) {
-        this.shoppingLists = shoppingLists;
+    public ProductAdapter(List<Product> products, Context context) {
+        this.products = products;
         this.context = context;
         db = Room.databaseBuilder(context, AppDatabase.class, "shopping-list-database")
                 .allowMainThreadQueries()
@@ -50,9 +49,9 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @NonNull
     @Override
-    public ShoppingListAdapter.ShoppingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shopping_list, parent, false);
-        return new ShoppingListViewHolder(view);
+    public ProductAdapter.ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
+        return new ProductViewHolder(view);
     }
 
     /**
@@ -62,8 +61,8 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      * @param position Позиция элемента в наборе данных адаптера.
      */
     @Override
-    public void onBindViewHolder(@NonNull ShoppingListAdapter.ShoppingListViewHolder holder, int position) {
-        holder.shoppingNameTextView.setText(shoppingLists.get(position).getTitle());
+    public void onBindViewHolder(@NonNull ProductAdapter.ProductViewHolder holder, int position) {
+        holder.productNameTextView.setText(products.get(position).getName());
     }
 
     /**
@@ -72,12 +71,12 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      * @param position Позиция элемента, который должен быть удален.
      */
     public void removeItem(int position) {
-        ShoppingList shoppingList = shoppingLists.get(position);
+        Product product = this.products.get(position);
         new Thread(() -> {
-            db.shoppingListDao().delete(shoppingList);
+            db.productsDao().delete(product);
 
             ((Activity)context).runOnUiThread(() -> {
-                shoppingLists.remove(position);
+                this.products.remove(position);
                 notifyItemRemoved(position);
             });
         }).start();
@@ -90,24 +89,24 @@ public class ShoppingListAdapter extends RecyclerView.Adapter<ShoppingListAdapte
      */
     @Override
     public int getItemCount() {
-        return shoppingLists.size();
+        return products.size();
     }
 
     /**
-     * Класс ViewHolder для ShoppingListAdapter.
+     * Класс ViewHolder для ProductAdapter.
      * Хранит представления для каждого элемента в RecyclerView.
      */
-    public static class ShoppingListViewHolder extends RecyclerView.ViewHolder{
-        public TextView shoppingNameTextView;
+    public static class ProductViewHolder extends RecyclerView.ViewHolder{
+        public TextView productNameTextView;
 
         /**
-         * Конструктор для ShoppingListViewHolder.
+         * Конструктор для ProductViewHolder.
          *
          * @param itemView Корневое представление макета элемента.
          */
-        public ShoppingListViewHolder(View itemView) {
+        public ProductViewHolder(View itemView) {
             super(itemView);
-            shoppingNameTextView = itemView.findViewById(R.id.nameTextView);
+            productNameTextView = itemView.findViewById(R.id.nameTextView);
 
         }
     }

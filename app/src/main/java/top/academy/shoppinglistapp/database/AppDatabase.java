@@ -3,11 +3,11 @@ package top.academy.shoppinglistapp.database;
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
-import top.academy.shoppinglistapp.dao.ShoppingListDao;
 import top.academy.shoppinglistapp.dao.ProductDao;
+import top.academy.shoppinglistapp.dao.ShoppingListDao;
 import top.academy.shoppinglistapp.dao.ShoppingListProductDao;
-import top.academy.shoppinglistapp.entity.ShoppingList;
 import top.academy.shoppinglistapp.entity.Product;
+import top.academy.shoppinglistapp.entity.ShoppingList;
 import top.academy.shoppinglistapp.entity.ShoppingListProduct;
 
 /**
@@ -21,7 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
      *
      * @return DAO для работы с сущностью Product.
      */
-    public abstract ProductDao productDao();
+    public abstract ProductDao productsDao();
 
     /**
      * Возвращает DAO для работы с сущностью ShoppingList.

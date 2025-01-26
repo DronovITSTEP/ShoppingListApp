@@ -1,19 +1,13 @@
 package top.academy.shoppinglistapp;
 
-import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
-import static androidx.recyclerview.widget.ItemTouchHelper.LEFT;
-import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
-
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -38,7 +32,7 @@ import top.academy.shoppinglistapp.swipe.SwipeControllerActions;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView listShoppingRecyclerView;
     private ShoppingListAdapter shoppingListAdapter;
-    private ShoppingListViewModel viewModel;
+    private MyViewModel<ShoppingList> viewModel;
     private SwipeController swipeController;
 
     /**
@@ -62,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
         listShoppingRecyclerView = findViewById(R.id.listShoppingRecyclerView);
         listShoppingRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        viewModel = new ViewModelProvider(this).get(ShoppingListViewModel.class);
-        viewModel.getShoppingLists().observe(this, shoppingLists -> {
+        viewModel = new ViewModelProvider(this, new MyViewModelFactory<>(getApplication(), ShoppingList.class))
+                .get(MyViewModel.class);
+
+        viewModel.getLists().observe(this, shoppingLists -> {
             shoppingListAdapter = new ShoppingListAdapter(shoppingLists, this);
             listShoppingRecyclerView.setAdapter(shoppingListAdapter);
         });
@@ -113,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             shoppingList.setDescription(description);
             shoppingList.setDate(new Date().toString());
 
-            viewModel.insertShoppingList(shoppingList);
+            viewModel.insert(shoppingList);
         });
         builder.setNegativeButton(R.string.cancelText, (dialog, witch) -> dialog.dismiss());
 

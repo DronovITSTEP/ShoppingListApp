@@ -10,41 +10,50 @@ import androidx.room.Room;
 import java.util.List;
 
 import top.academy.shoppinglistapp.database.AppDatabase;
+import top.academy.shoppinglistapp.entity.Product;
 import top.academy.shoppinglistapp.entity.ShoppingList;
 
 /**
  * ViewModel для управления списками покупок.
  * Этот класс управляет загрузкой, вставкой и удалением списков покупок из базы данных.
  */
-public class ShoppingListViewModel extends AndroidViewModel {
+public class MyViewModel<T> extends AndroidViewModel {
     private final AppDatabase db;
 
-    private final LiveData<List<ShoppingList>> shoppingLists;
+    private final LiveData<List<T>> lists;
+    private Class<T> entityClass;
 
     /**
-     * Конструктор для ShoppingListViewModel.
+     * Конструктор для MyViewModel.
      *
      * @param application Контекст приложения.
      */
-    public ShoppingListViewModel(Application application) {
+    public MyViewModel(Application application, Class<T> entityClass) {
         super(application);
 
         db = Room.databaseBuilder(application.getBaseContext(), AppDatabase.class, "shopping-list-database")
                 .fallbackToDestructiveMigration()
                 .allowMainThreadQueries()
-                .build();;
-        shoppingLists = new MutableLiveData<>();
-        loadShoppingList();
+                .build();
+        this.entityClass = entityClass;
+        lists = new MutableLiveData<>();
+        loadList();
     }
 
     /**
      * Загружает все списки покупок из базы данных.
      */
-    private void loadShoppingList() {
+    private void loadList() {
         new Thread(() ->
         {
-            List<ShoppingList> list = db.shoppingListDao().getAllShoppingLists();
-            ((MutableLiveData<List<ShoppingList>>) shoppingLists).postValue(list);
+            List<T> list = null;
+            if (entityClass == ShoppingList.class) {
+                list = (List<T>) db.shoppingListDao().getAllShoppingLists();
+            }
+            else if(entityClass == Product.class) {
+                list = (List<T>) db.productsDao().getAllProducts();
+            }
+            ((MutableLiveData<List<T>>) lists).postValue(list);
         }).start();
     }
 
@@ -53,31 +62,27 @@ public class ShoppingListViewModel extends AndroidViewModel {
      *
      * @return LiveData списка списков покупок.
      */
-    public LiveData<List<ShoppingList>> getShoppingLists() {
-        return shoppingLists;
+    public LiveData<List<T>> getLists() {
+        return lists;
     }
 
     /**
      * Вставляет новый список покупок в базу данных.
      *
-     * @param shoppingList Список покупок для вставки.
+     * @param entity Список покупок для вставки.
      */
-    public void insertShoppingList(ShoppingList shoppingList) {
+    public void insert(T entity) {
         new Thread(() -> {
-            db.shoppingListDao().insert(shoppingList);
-            loadShoppingList();
+            if (entityClass == ShoppingList.class) {
+                db.shoppingListDao().insert((ShoppingList) entity);
+            }
+            else if(entityClass == Product.class) {
+                db.productsDao().insert((Product) entity);
+            }
+
+            loadList();
         }).start();
     }
 
-    /**
-     * Удаляет список покупок из базы данных.
-     *
-     * @param shoppingList Список покупок для удаления.
-     */
-    public void deleteShoppingList(ShoppingList shoppingList) {
-        new Thread(() -> {
-            db.shoppingListDao().delete(shoppingList);
-            loadShoppingList();
-        }).start();
-    }
+
 }
